@@ -1,0 +1,11 @@
+AppData/
+node_modules/
+.git/
+*.log
+.expo/
+.vscode/
+.DS_Store
+Thumbs.db
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
