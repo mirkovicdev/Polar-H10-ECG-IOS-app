@@ -26,11 +26,11 @@ This iOS application provides **portable, real-time ECG acquisition and analysis
 ## 📱 Mobile Architecture & Real-time Processing
 
 <div align="center">
-  <img src="app1.png" alt="Real-time ECG Monitoring" width="300"/>
-  <img src="app2.png" alt="Clinical Analytics Dashboard" width="300"/>
+  <img src="app1.png" alt="Clinical assessment" width="300"/>
+  <img src="app2.png" alt="Temporal burden" width="300"/>
 </div>
 
-*Figure 1: Real-time ECG monitoring interface (left) and comprehensive analytics dashboard (right) with live PVC detection and clinical assessment*
+*Figure 1: Clinical assessment and burden analysis info (left) and temporal PVC burden analysis with clinical risk stratification (right)*
 
 ### System Overview
 The application implements a **native mobile signal processing pipeline** optimized for iOS devices with sub-100ms processing latency:
@@ -187,11 +187,11 @@ npx expo start
 6. **Monitor**: Begin real-time ECG monitoring with PVC detection
 
 <div align="center">
-  <img src="app3.png" alt="Bluetooth Connection Interface" width="300"/>
+  <img src="app3.png" alt="ECG live time chart" width="300"/>
   <img src="app4.png" alt="Temporal Burden Analysis" width="300"/>
 </div>
 
-*Figure 2: Bluetooth device discovery and connection interface (left) and temporal PVC burden analysis with clinical risk stratification (right)*
+*Figure 2: ECG live time chart showing detected PVCs (left) and live statistics card and bluetooth connection (right)*
 
 ## 📈 Advanced Analytics & Clinical Features
 
