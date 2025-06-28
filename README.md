@@ -25,8 +25,12 @@ This iOS application provides **portable, real-time ECG acquisition and analysis
 
 ## 📱 Mobile Architecture & Real-time Processing
 
-![Real-time ECG Monitoring Interface](app1.png)
-*Figure 1: Real-time ECG waveform display with live PVC detection and clinical-grade mobile interface*
+<div align="center">
+  <img src="app1.png" alt="Real-time ECG Monitoring" width="300"/>
+  <img src="app2.png" alt="Clinical Analytics Dashboard" width="300"/>
+</div>
+
+*Figure 1: Real-time ECG monitoring interface (left) and comprehensive analytics dashboard (right) with live PVC detection and clinical assessment*
 
 ### System Overview
 The application implements a **native mobile signal processing pipeline** optimized for iOS devices with sub-100ms processing latency:
@@ -70,9 +74,6 @@ const DetectionPipelines = {
 - **Confidence Scoring**: Multi-factor detection confidence weighting
 
 ## 📊 Mobile User Interface & Experience
-
-![Clinical Analytics Dashboard](app2.png)
-*Figure 2: Comprehensive analytics dashboard with live statistics, signal quality monitoring, and clinical assessment*
 
 ### Real-time ECG Visualization
 - **High-Performance Rendering**: 60fps ECG waveform display with smooth scrolling
@@ -185,13 +186,14 @@ npx expo start
 5. **Training Phase**: Allow 40 beats for morphology learning (30-60 seconds)
 6. **Monitor**: Begin real-time ECG monitoring with PVC detection
 
-![Bluetooth Connection Interface](app3.png)
-*Figure 3: Bluetooth device discovery and connection interface with real-time pairing status*
+<div align="center">
+  <img src="app3.png" alt="Bluetooth Connection Interface" width="300"/>
+  <img src="app4.png" alt="Temporal Burden Analysis" width="300"/>
+</div>
+
+*Figure 2: Bluetooth device discovery and connection interface (left) and temporal PVC burden analysis with clinical risk stratification (right)*
 
 ## 📈 Advanced Analytics & Clinical Features
-
-![Temporal Burden Analysis](app4.png)
-*Figure 4: Temporal PVC burden analysis with 5-minute sliding window assessment and clinical risk stratification*
 
 ### Temporal Burden Analysis
 - **5-Minute Sliding Windows**: Continuous burden calculation with clinical relevance
