@@ -6,7 +6,7 @@ import { BurdenCalculator } from '../utils/BurdenCalculator';
 
 export default function StatisticsCard() {
   const { state } = useECG();
-  const { detectionResult, currentBurden, trainingStatus } = state;
+  const { detectionResult, currentBurden, trainingStatus, ecgTimestamps, recordingStartTime } = state;
 
   // Don't show stats during training
   if (trainingStatus.isLearning) {
@@ -14,9 +14,20 @@ export default function StatisticsCard() {
   }
 
   const formatDuration = (ms: number) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
+    // Ensure we have a positive duration
+    const duration = Math.max(0, ms);
+    const minutes = Math.floor(duration / 60000);
+    const seconds = Math.floor((duration % 60000) / 1000);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // Calculate recording duration properly
+  const getRecordingDuration = () => {
+    if (ecgTimestamps.length === 0 || recordingStartTime === 0) {
+      return 0;
+    }
+    const latestTimestamp = ecgTimestamps[ecgTimestamps.length - 1];
+    return latestTimestamp - recordingStartTime;
   };
 
   const getHeartRateColor = (hr: number) => {
@@ -43,7 +54,7 @@ export default function StatisticsCard() {
         <View style={styles.duration}>
           <Ionicons name="time" size={14} color="#9ca3af" />
           <Text style={styles.durationText}>
-            {formatDuration(detectionResult.timeSpanMs)}
+            {formatDuration(getRecordingDuration())}
           </Text>
         </View>
       </View>
@@ -167,7 +178,7 @@ export default function StatisticsCard() {
               </View>
               <View style={styles.burdenMetric}>
                 <Text style={styles.burdenMetricValue}>
-                  {currentBurden.timeWindow.toFixed(1)}m
+                  {(getRecordingDuration() / 60000).toFixed(1)}min
                 </Text>
                 <Text style={styles.burdenMetricLabel}>Duration</Text>
               </View>

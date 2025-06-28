@@ -16,7 +16,7 @@ import { useBluetooth } from '../context/BluetoothContext';
 import { BurdenCalculator } from '../utils/BurdenCalculator';
 
 const { width: screenWidth } = Dimensions.get('window');
-const chartWidth = screenWidth - 32;
+const chartWidth = screenWidth - 64; // More padding for chart
 
 type TimeRange = 'last30min' | 'fullSession';
 
@@ -122,102 +122,104 @@ export default function BurdenScreen() {
 
         {/* Chart Section */}
         <View style={styles.chartSection}>
-          {chartData.length > 0 ? (
-            <VictoryChart
-              width={chartWidth}
-              height={320}
-              domain={{ y: [0, 50] }} // 0-50% range
-              padding={{ top: 20, bottom: 60, left: 60, right: 20 }}
-              style={{
-                parent: { backgroundColor: 'transparent' }
-              }}
-            >
-              {/* Grid Lines */}
-              <VictoryAxis
-                dependentAxis
+          <View style={styles.chartContainer}>
+            {chartData.length > 0 ? (
+              <VictoryChart
+                width={chartWidth}
+                height={300}
+                domain={{ y: [0, 50] }} // 0-50% range
+                padding={{ top: 20, bottom: 50, left: 50, right: 30 }}
                 style={{
-                  axis: { stroke: '#374151', strokeWidth: 1 },
-                  grid: { stroke: '#374151', strokeWidth: 0.5 },
-                  tickLabels: { fill: '#ffffff', fontSize: 12 },
+                  parent: { backgroundColor: 'transparent' }
                 }}
-                tickCount={6}
-                tickFormat={(t) => `${t}%`}
-              />
-              <VictoryAxis
-                style={{
-                  axis: { stroke: '#374151', strokeWidth: 1 },
-                  grid: { stroke: '#374151', strokeWidth: 0.5 },
-                  tickLabels: { fill: '#ffffff', fontSize: 10 },
-                }}
-                tickCount={6}
-                tickFormat={(t) => {
-                  const index = Math.floor(t);
-                  if (chartData[index]) {
-                    const time = new Date(chartData[index].timestamp);
-                    return time.toLocaleTimeString('en-US', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    });
-                  }
-                  return '';
-                }}
-              />
+              >
+                {/* Grid Lines */}
+                <VictoryAxis
+                  dependentAxis
+                  style={{
+                    axis: { stroke: '#374151', strokeWidth: 1 },
+                    grid: { stroke: '#374151', strokeWidth: 0.5 },
+                    tickLabels: { fill: '#ffffff', fontSize: 12 },
+                  }}
+                  tickCount={6}
+                  tickFormat={(t) => `${t}%`}
+                />
+                <VictoryAxis
+                  style={{
+                    axis: { stroke: '#374151', strokeWidth: 1 },
+                    grid: { stroke: '#374151', strokeWidth: 0.5 },
+                    tickLabels: { fill: '#ffffff', fontSize: 10 },
+                  }}
+                  tickCount={5}
+                  tickFormat={(t) => {
+                    const index = Math.floor(t);
+                    if (chartData[index]) {
+                      const time = new Date(chartData[index].timestamp);
+                      return time.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      });
+                    }
+                    return '';
+                  }}
+                />
 
-              {/* Burden Area Chart */}
-              <VictoryArea
-                data={chartData}
-                style={{
-                  data: {
-                    fill: '#ef4444',
-                    fillOpacity: 0.3,
-                    stroke: '#ef4444',
-                    strokeWidth: 2,
-                  }
-                }}
-                interpolation="monotoneX"
-              />
+                {/* Burden Area Chart */}
+                <VictoryArea
+                  data={chartData}
+                  style={{
+                    data: {
+                      fill: '#ef4444',
+                      fillOpacity: 0.3,
+                      stroke: '#ef4444',
+                      strokeWidth: 2,
+                    }
+                  }}
+                  interpolation="monotoneX"
+                />
 
-              {/* Burden Line */}
-              <VictoryLine
-                data={chartData}
-                style={{
-                  data: { 
-                    stroke: '#ef4444', 
-                    strokeWidth: 2,
-                  }
-                }}
-                interpolation="monotoneX"
-              />
-            </VictoryChart>
-          ) : (
-            <View style={styles.emptyChart}>
-              {isTraining ? (
-                <>
-                  <Ionicons name="school" size={48} color="#f59e0b" />
-                  <Text style={styles.emptyChartText}>Training in Progress</Text>
-                  <Text style={styles.emptyChartSubtext}>
-                    Burden analysis will start after morphology training completes
-                  </Text>
-                </>
-              ) : isConnected ? (
-                <>
-                  <Ionicons name="time" size={48} color="#6b7280" />
-                  <Text style={styles.emptyChartText}>Collecting Burden Data</Text>
-                  <Text style={styles.emptyChartSubtext}>
-                    Need 5+ minutes of data for analysis
-                  </Text>
-                </>
-              ) : (
-                <>
-                  <Ionicons name="bluetooth" size={48} color="#6b7280" />
-                  <Text style={styles.emptyChartText}>Connect to Polar H10</Text>
-                  <Text style={styles.emptyChartSubtext}>
-                    Start ECG monitoring to view burden analysis
-                  </Text>
-                </>
-              )}
-            </View>
-          )}
+                {/* Burden Line */}
+                <VictoryLine
+                  data={chartData}
+                  style={{
+                    data: { 
+                      stroke: '#ef4444', 
+                      strokeWidth: 2,
+                    }
+                  }}
+                  interpolation="monotoneX"
+                />
+              </VictoryChart>
+            ) : (
+              <View style={styles.emptyChart}>
+                {isTraining ? (
+                  <>
+                    <Ionicons name="school" size={48} color="#f59e0b" />
+                    <Text style={styles.emptyChartText}>Training in Progress</Text>
+                    <Text style={styles.emptyChartSubtext}>
+                      Burden analysis will start after morphology training completes
+                    </Text>
+                  </>
+                ) : isConnected ? (
+                  <>
+                    <Ionicons name="time" size={48} color="#6b7280" />
+                    <Text style={styles.emptyChartText}>Collecting Burden Data</Text>
+                    <Text style={styles.emptyChartSubtext}>
+                      Need 5+ minutes of data for analysis
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Ionicons name="bluetooth" size={48} color="#6b7280" />
+                    <Text style={styles.emptyChartText}>Connect to Polar H10</Text>
+                    <Text style={styles.emptyChartSubtext}>
+                      Start ECG monitoring to view burden analysis
+                    </Text>
+                  </>
+                )}
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Statistics Cards */}
@@ -433,8 +435,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#374151',
   },
+  chartContainer: {
+    overflow: 'hidden', // Prevent chart overflow
+    borderRadius: 8,
+  },
   emptyChart: {
-    height: 320,
+    height: 300,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 32,

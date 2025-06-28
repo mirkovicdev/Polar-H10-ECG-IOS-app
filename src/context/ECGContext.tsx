@@ -111,7 +111,7 @@ function ecgReducer(state: ECGState, action: ECGAction): ECGState {
       
       if (state.isLiveMode && trimmedTimestamps.length > 0) {
         const latestTime = trimmedTimestamps[trimmedTimestamps.length - 1];
-        const relativeTime = latestTime - state.recordingStartTime;
+        const relativeTime = (latestTime - state.recordingStartTime) / 1000;
         viewEnd = relativeTime;
         viewStart = Math.max(0, viewEnd - state.timeWindowSeconds);
       }
@@ -149,7 +149,7 @@ function ecgReducer(state: ECGState, action: ECGAction): ECGState {
       if (action.payload && state.ecgTimestamps.length > 0) {
         // Switch to live mode - jump to latest data
         const latestTime = state.ecgTimestamps[state.ecgTimestamps.length - 1];
-        const relativeTime = latestTime - state.recordingStartTime;
+        const relativeTime = (latestTime - state.recordingStartTime) / 1000;
         newViewEnd = relativeTime;
         newViewStart = Math.max(0, newViewEnd - state.timeWindowSeconds);
       }
@@ -215,27 +215,32 @@ export function ECGProvider({ children }: { children: React.ReactNode }) {
   const beatHistoryManagerRef = useRef(new BeatHistoryManager());
   const temporalBurdenCalculatorRef = useRef(new TemporalBurdenCalculator());
   const lastBurdenUpdateRef = useRef(0);
+  const recordingStartTimeRef = useRef(0);
 
   // Initialize ECG data callback
   useEffect(() => {
     setECGDataCallback((data) => {
+      // Initialize recording start time immediately on first data
+      if (recordingStartTimeRef.current === 0 && data.timestamps.length > 0) {
+        recordingStartTimeRef.current = data.timestamps[0] * 1000; // Convert to milliseconds
+        dispatch({ type: 'INIT_RECORDING', payload: recordingStartTimeRef.current });
+      }
+
+      // Convert timestamps to milliseconds
+      const timestampsMs = data.timestamps.map(t => t * 1000);
+
       // Add new ECG data to state
       dispatch({ 
         type: 'ADD_ECG_DATA', 
         payload: { 
           samples: data.samples, 
-          timestamps: data.timestamps 
+          timestamps: timestampsMs
         } 
       });
 
       // Process each sample through PVC detector
       data.samples.forEach((amplitude, i) => {
-        const timestamp = data.timestamps[i] * 1000; // Convert to milliseconds
-        
-        // Initialize recording start time on first sample
-        if (state.recordingStartTime === 0) {
-          dispatch({ type: 'INIT_RECORDING', payload: timestamp });
-        }
+        const timestamp = timestampsMs[i];
         
         const result = pvcDetectorRef.current.processECGSample(amplitude, timestamp);
         
@@ -312,7 +317,7 @@ export function ECGProvider({ children }: { children: React.ReactNode }) {
         }
       });
     });
-  }, [setECGDataCallback, state.recordingStartTime]);
+  }, [setECGDataCallback]);
 
   // Reset detection when disconnected
   useEffect(() => {
@@ -335,7 +340,7 @@ export function ECGProvider({ children }: { children: React.ReactNode }) {
     
     // Don't go beyond available data
     if (state.ecgTimestamps.length > 0) {
-      const maxTime = state.ecgTimestamps[state.ecgTimestamps.length - 1] - state.recordingStartTime;
+      const maxTime = (state.ecgTimestamps[state.ecgTimestamps.length - 1] - state.recordingStartTime) / 1000;
       if (newEnd > maxTime) {
         // Hit the end - go to live mode
         goToLiveMode();
@@ -356,6 +361,7 @@ export function ECGProvider({ children }: { children: React.ReactNode }) {
     beatHistoryManagerRef.current.clear();
     temporalBurdenCalculatorRef.current.clear();
     lastBurdenUpdateRef.current = 0;
+    recordingStartTimeRef.current = 0;
     
     // Reset state
     dispatch({ type: 'RESET_RECORDING' });

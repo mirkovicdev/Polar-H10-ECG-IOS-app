@@ -17,6 +17,7 @@ import { useBluetooth } from '../context/BluetoothContext';
 export default function BluetoothConnectionCard() {
   const { state, startScan, connectToDevice, disconnect, clearError } = useBluetooth();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [connectingDeviceId, setConnectingDeviceId] = useState<string | null>(null);
 
   const handleScan = async () => {
     try {
@@ -32,11 +33,14 @@ export default function BluetoothConnectionCard() {
 
   const handleConnect = async (device: Device) => {
     try {
+      setConnectingDeviceId(device.id); // Set connecting state immediately
       await connectToDevice(device);
       setIsExpanded(false);
+      setConnectingDeviceId(null); // Clear connecting state
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error('Connection failed:', error);
+      setConnectingDeviceId(null); // Clear connecting state on error
       Alert.alert('Connection Failed', `Could not connect to ${device.name}. Please try again.`);
     }
   };
@@ -80,22 +84,39 @@ export default function BluetoothConnectionCard() {
     return 'Ready to scan';
   };
 
-  const renderDeviceItem = ({ item }: { item: Device }) => (
-    <TouchableOpacity
-      style={styles.deviceItem}
-      onPress={() => handleConnect(item)}
-      disabled={state.isScanning}
-    >
-      <View style={styles.deviceInfo}>
-        <Ionicons name="heart" size={20} color="#ef4444" />
-        <View style={styles.deviceText}>
-          <Text style={styles.deviceName}>{item.name || 'Unknown Device'}</Text>
-          <Text style={styles.deviceId}>{item.id}</Text>
+  const renderDeviceItem = ({ item }: { item: Device }) => {
+    const isConnecting = connectingDeviceId === item.id;
+    
+    return (
+      <TouchableOpacity
+        style={[
+          styles.deviceItem,
+          isConnecting && styles.deviceItemConnecting
+        ]}
+        onPress={() => handleConnect(item)}
+        disabled={state.isScanning || isConnecting}
+      >
+        <View style={styles.deviceInfo}>
+          <Ionicons name="heart" size={20} color="#ef4444" />
+          <View style={styles.deviceText}>
+            <Text style={styles.deviceName}>{item.name || 'Unknown Device'}</Text>
+            <Text style={[
+              styles.deviceId,
+              isConnecting && styles.connectingText
+            ]}>
+              {isConnecting ? 'Connecting...' : item.id}
+            </Text>
+          </View>
         </View>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#6b7280" />
-    </TouchableOpacity>
-  );
+        
+        {isConnecting ? (
+          <ActivityIndicator size="small" color="#f59e0b" />
+        ) : (
+          <Ionicons name="chevron-forward" size={20} color="#6b7280" />
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -343,6 +364,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#374151',
   },
+  deviceItemConnecting: {
+    backgroundColor: '#1c1917', // Slightly different background when connecting
+  },
   deviceInfo: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -361,6 +385,10 @@ const styles = StyleSheet.create({
   deviceId: {
     fontSize: 12,
     color: '#6b7280',
+  },
+  connectingText: {
+    color: '#f59e0b', // Orange color for "Connecting..."
+    fontStyle: 'italic',
   },
   scanningContainer: {
     padding: 32,
